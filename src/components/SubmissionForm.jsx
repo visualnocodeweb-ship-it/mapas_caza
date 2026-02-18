@@ -8,7 +8,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const SubmissionForm = () => {
     const [formData, setFormData] = useState({
         email: '',
-        establecimiento: ''
+        establecimiento: '',
+        fecha: new Date().toISOString().split('T')[0] // Fecha de hoy por defecto
     });
     const [polygon, setPolygon] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -30,38 +31,37 @@ const SubmissionForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         setMessage({ type: '', text: '' });
 
         if (!formData.email || !formData.establecimiento) {
             setMessage({ type: 'error', text: 'Por favor completa todos los campos' });
+            setLoading(false);
             return;
         }
 
         if (!polygon) {
-            setMessage({ type: 'error', text: 'Por favor dibuja un polígono en el mapa' });
+            setMessage({ type: 'error', text: 'Por favor dibuja el área en el mapa' });
+            setLoading(false);
             return;
         }
 
-        setLoading(true);
-
         try {
             const response = await axios.post(`${API_URL}/api/submissions`, {
-                email: formData.email,
-                establecimiento: formData.establecimiento,
-                polygon: polygon
+                ...formData,
+                polygon
             });
 
-            setSubmittedId(response.data.data.id);
-            setMessage({
-                type: 'success',
-                text: '✅ Registro guardado exitosamente.'
-            });
+            console.log('Respuesta:', response.data);
+            setSubmittedId(response.data.data.id); // Guardar ID para descarga
+            setMessage({ type: 'success', text: 'Registro guardado exitosamente!' });
 
+            // NO reseteamos formulario aquí para dejar que el usuario descargue
         } catch (error) {
             console.error('Error al enviar:', error);
             setMessage({
                 type: 'error',
-                text: error.response?.data?.error || 'Error al guardar el registro. Intenta nuevamente.'
+                text: error.response?.data?.error || 'Error al guardar el registro'
             });
         } finally {
             setLoading(false);
@@ -69,10 +69,15 @@ const SubmissionForm = () => {
     };
 
     const handleReset = () => {
-        setFormData({ email: '', establecimiento: '' });
+        setFormData({
+            email: '',
+            establecimiento: '',
+            fecha: new Date().toISOString().split('T')[0]
+        });
         setPolygon(null);
         setSubmittedId(null);
         setMessage({ type: '', text: '' });
+        // Recargar la página es la forma más limpia de limpiar el mapa completamente
         window.location.reload();
     };
 
@@ -125,17 +130,27 @@ const SubmissionForm = () => {
 
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label htmlFor="email">
-                        Email <span className="required">*</span>
-                    </label>
+                    <label>Fecha de Siembra/Verdeo:</label>
+                    <input
+                        type="date"
+                        name="fecha"
+                        value={formData.fecha}
+                        onChange={handleInputChange}
+                        required
+                        className="form-control"
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Correo Electrónico:</label>
                     <input
                         type="email"
-                        id="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
                         placeholder="tu@email.com"
                         required
+                        className="form-control"
                     />
                 </div>
 

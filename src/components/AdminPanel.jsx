@@ -12,12 +12,16 @@ const AdminPanel = () => {
     const [error, setError] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+    // Estado para paginación
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalRecords, setTotalRecords] = useState(0);
+
     useEffect(() => {
-        // Verificar si ya está autenticado
         const auth = localStorage.getItem('adminAuth');
         if (auth === 'true') {
             setIsAuthenticated(true);
-            fetchSubmissions();
+            fetchSubmissions(1);
         } else {
             setLoading(false);
         }
@@ -25,7 +29,7 @@ const AdminPanel = () => {
 
     const handleLoginSuccess = () => {
         setIsAuthenticated(true);
-        fetchSubmissions();
+        fetchSubmissions(1);
     };
 
     const handleLogout = () => {
@@ -34,15 +38,47 @@ const AdminPanel = () => {
         setSubmissions([]);
     };
 
-    const fetchSubmissions = async () => {
+    // Fetch con paginación
+    const fetchSubmissions = async (page) => {
         try {
-            const response = await axios.get(`${API_URL}/api/submissions`);
+            setLoading(true);
+            const response = await axios.get(`${API_URL}/api/submissions?page=${page}&limit=10`);
+
             setSubmissions(response.data.data);
+
+            // Actualizar info de paginación
+            if (response.data.pagination) {
+                setCurrentPage(response.data.pagination.currentPage);
+                setTotalPages(response.data.pagination.totalPages);
+                setTotalRecords(response.data.pagination.totalRecords);
+            }
+
             setLoading(false);
         } catch (err) {
             console.error('Error al cargar registros:', err);
             setError('Error al cargar los registros');
             setLoading(false);
+        }
+    };
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            fetchSubmissions(newPage);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.')) {
+            return;
+        }
+
+        try {
+            await axios.delete(`${API_URL}/api/submissions/${id}`);
+            // Recargar página actual
+            fetchSubmissions(currentPage);
+        } catch (err) {
+            console.error('Error al eliminar:', err);
+            alert('Error al eliminar el registro');
         }
     };
 
@@ -90,12 +126,11 @@ const AdminPanel = () => {
         return geoJsonPolygon.coordinates[0].map(coord => [coord[1], coord[0]]);
     };
 
-    // Si no está autenticado, mostrar login
     if (!isAuthenticated) {
         return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
     }
 
-    if (loading) {
+    if (loading && submissions.length === 0) {
         return <div className="admin-panel"><p>Cargando registros...</p></div>;
     }
 
@@ -104,7 +139,7 @@ const AdminPanel = () => {
             <div className="admin-header">
                 <div>
                     <h2>📊 Panel de Administración</h2>
-                    <p>Total de registros: {submissions.length}</p>
+                    <p>Total de registros: {totalRecords}</p>
                 </div>
                 <div className="admin-actions">
                     {submissions.length > 0 && (
@@ -140,7 +175,8 @@ const AdminPanel = () => {
                                 >
                                     <Popup>
                                         <strong>{sub.establecimiento}</strong><br />
-                                        {sub.email}<br />
+                                        Superficie: {sub.area_has} ha<br />
+                                        Fecha: {sub.fecha ? new Date(sub.fecha).toLocaleDateString('es-AR') : 'N/A'}<br />
                                         <button
                                             onClick={() => downloadKML(sub.id, sub.establecimiento)}
                                             style={{ marginTop: '5px', cursor: 'pointer' }}
@@ -158,39 +194,69 @@ const AdminPanel = () => {
             {submissions.length === 0 ? (
                 <p className="no-data">No hay registros todavía</p>
             ) : (
-                <div className="submissions-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Email</th>
-                                <th>Establecimiento</th>
-                                <th>IP</th>
-                                <th>Fecha</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {submissions.map((sub) => (
-                                <tr key={sub.id}>
-                                    <td>{sub.id}</td>
-                                    <td>{sub.email}</td>
-                                    <td>{sub.establecimiento}</td>
-                                    <td>{sub.user_ip || 'N/A'}</td>
-                                    <td>{new Date(sub.created_at).toLocaleDateString('es-AR')}</td>
-                                    <td>
-                                        <button
-                                            onClick={() => downloadKML(sub.id, sub.establecimiento)}
-                                            className="download-btn"
-                                        >
-                                            📥 KML
-                                        </button>
-                                    </td>
+                <>
+                    <div className="submissions-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Establecimiento</th>
+                                    <th>Superficie</th>
+                                    <th>Email</th>
+                                    <th>Acciones</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {submissions.map((sub) => (
+                                    <tr key={sub.id}>
+                                        <td>{sub.id}</td>
+                                        <td>{sub.fecha ? new Date(sub.fecha).toLocaleDateString('es-AR') : '-'}</td>
+                                        <td>{sub.establecimiento}</td>
+                                        <td><strong>{sub.area_has} ha</strong></td>
+                                        <td>{sub.email}</td>
+                                        <td className="actions-cell">
+                                            <button
+                                                onClick={() => downloadKML(sub.id, sub.establecimiento)}
+                                                className="action-btn download-btn"
+                                                title="Descargar KML"
+                                            >
+                                                📥
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(sub.id)}
+                                                className="action-btn delete-btn"
+                                                title="Eliminar registro"
+                                                style={{ backgroundColor: '#e53e3e', marginLeft: '5px' }}
+                                            >
+                                                🗑️
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Paginación */}
+                    <div className="pagination" style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', gap: '10px', alignItems: 'center' }}>
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            style={{ padding: '8px 16px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                        >
+                            ⬅️ Anterior
+                        </button>
+                        <span>Página {currentPage} de {totalPages}</span>
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            style={{ padding: '8px 16px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                        >
+                            Siguiente ➡️
+                        </button>
+                    </div>
+                </>
             )}
         </div>
     );
