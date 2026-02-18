@@ -45,6 +45,23 @@ const getClientIP = (req) => {
 
 // --- ENDPOINTS ---
 
+// 0. Login administrativo
+app.post('/api/admin/login', (req, res) => {
+    const { password } = req.body;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminPassword) {
+        console.error('⚠️ ADMIN_PASSWORD no está configurada en las variables de entorno');
+        return res.status(500).json({ success: false, message: 'Error de configuración del servidor' });
+    }
+
+    if (password === adminPassword) {
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
+    }
+});
+
 // 1. Guardar nuevo registro
 app.post('/api/submissions', async (req, res) => {
     try {
