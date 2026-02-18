@@ -130,7 +130,7 @@ const SubmissionForm = () => {
 
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Fecha de Siembra/Verdeo:</label>
+                    <label>Fecha:</label>
                     <input
                         type="date"
                         name="fecha"

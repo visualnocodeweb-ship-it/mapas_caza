@@ -112,7 +112,7 @@ const MapDrawer = ({ onPolygonChange }) => {
             </MapContainer>
             <div className="map-hint">
                 <span className="hint-icon">💡</span>
-                <strong>Tip:</strong> Puedes dibujar varios polígonos. Usa el botón <strong>DIBUJAR</strong> para agregar áreas y <strong>EDITAR/BORRAR</strong> para modificar.
+                <strong>Tip:</strong> Puedes agregar 2 o 3 polígonos más. Usa <strong>DIBUJAR</strong> para añadir otras áreas y guardar todo junto.
             </div>
         </div>
     );
