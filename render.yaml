@@ -1,0 +1,34 @@
+services:
+  # Servicio Web (Backend)
+  - type: web
+    name: mapas-caza-backend
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && node index.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mapa_caza_2026
+          property: connectionString
+      - key: FRONTEND_URL
+        value: https://mapas-caza-frontend.onrender.com
+
+  # Sitio Estático (Frontend)
+  - type: web
+    name: mapas-caza-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://mapas-caza-backend.onrender.com
+
+databases:
+  - name: mapa_caza_2026
+    databaseName: mapa_caza_2026
+    user: mapa_caza_2026_user
+
