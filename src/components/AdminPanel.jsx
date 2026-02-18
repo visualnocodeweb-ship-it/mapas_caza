@@ -124,7 +124,7 @@ const AdminPanel = () => {
                 <div className="admin-map-container" style={{ height: '400px', marginBottom: '30px', borderRadius: '12px', overflow: 'hidden', border: '2px solid #e2e8f0' }}>
                     <MapContainer center={[-40.1687, -71.3473]} zoom={9} style={{ height: '100%', width: '100%' }}>
                         <TileLayer
-                            url="http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                            url="https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
                             maxZoom={20}
                             subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
                             attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'

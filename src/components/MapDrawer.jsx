@@ -92,9 +92,9 @@ const MapDrawer = ({ onPolygonChange }) => {
 
     return (
         <div className="map-container">
-            <MapContainer center={[-40.1687, -71.3473]} zoom={10} style={{ height: '100%', width: '100%' }}>
+            <MapContainer center={[-40.1687, -71.3473]} zoom={10} style={{ height: '500px', width: '100%', borderRadius: '12px' }}>
                 <TileLayer
-                    url="http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                    url="https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
                     maxZoom={20}
                     subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
                     attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
