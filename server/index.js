@@ -17,6 +17,7 @@ app.use(cors({
     origin: [
         'http://localhost:5173',
         'http://localhost:5174',
+        'https://mapas-caza-frontend.onrender.com',
         process.env.FRONTEND_URL
     ].filter(Boolean),
     credentials: true
