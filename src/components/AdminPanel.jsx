@@ -120,10 +120,22 @@ const AdminPanel = () => {
         }
     };
 
-    // Helper para convertir GeoJSON [lon, lat] a Leaflet [lat, lon]
-    const getPolygonPositions = (geoJsonPolygon) => {
-        if (!geoJsonPolygon || !geoJsonPolygon.coordinates) return [];
-        return geoJsonPolygon.coordinates[0].map(coord => [coord[1], coord[0]]);
+    // Helper para convertir GeoJSON a Leaflet positions
+    const getPolygonPositions = (geoJsonGeometry) => {
+        if (!geoJsonGeometry || !geoJsonGeometry.coordinates) return [];
+
+        const swapCoords = (coords) => coords.map(coord => [coord[1], coord[0]]);
+
+        if (geoJsonGeometry.type === 'Polygon') {
+            // Polygon: [ [[lng, lat], ...], [hole] ]
+            return geoJsonGeometry.coordinates.map(ring => swapCoords(ring));
+        } else if (geoJsonGeometry.type === 'MultiPolygon') {
+            // MultiPolygon: [ [ [[lng, lat], ...] ], ... ]
+            return geoJsonGeometry.coordinates.map(polygon =>
+                polygon.map(ring => swapCoords(ring))
+            );
+        }
+        return [];
     };
 
     if (!isAuthenticated) {
