@@ -381,76 +381,81 @@ tbody tr:hover {
 
 .leaflet-draw-toolbar a {
   width: auto !important;
-  height: 40px !important;
-  line-height: 40px !important;
+  height: 30px !important;
+  /* Altura reducida */
+  line-height: 30px !important;
   background-color: white !important;
   border-radius: 4px !important;
   margin-bottom: 5px !important;
-  padding-left: 44px !important;
-  /* Espacio para el icono */
-  padding-right: 15px !important;
+  padding-left: 36px !important;
+  /* Espacio ajustado para icono */
+  padding-right: 12px !important;
   text-decoration: none !important;
-  font-weight: bold !important;
+  font-weight: 600 !important;
+  /* Peso reducido */
+  font-size: 13px !important;
+  /* Letra más chica */
   color: #333 !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
   display: flex !important;
   align-items: center !important;
   white-space: nowrap !important;
 }
 
 .leaflet-draw-toolbar a:hover {
-  background-color: #f0f0f0 !important;
+  background-color: #f7f7f7 !important;
   color: #000 !important;
 }
 
 /* Iconos y Textos Específicos */
 .leaflet-draw-draw-polygon::after {
-  content: "DIBUJAR SIEMBRA/VERDEO";
-  font-size: 14px;
+  content: "DIBUJAR";
+  /* Texto simplificado */
 }
 
 .leaflet-draw-draw-polygon {
-  background-position: 10px center !important;
-  background-size: 24px 24px !important;
-  width: 250px !important;
-  /* Ancho suficiente para el texto */
+  background-position: 8px center !important;
+  background-size: 18px 18px !important;
+  /* Icono más chico */
+  width: auto !important;
+  /* Ancho automático ajustado al contenido */
 }
 
 .leaflet-draw-edit-edit::after {
   content: "EDITAR";
-  font-size: 14px;
 }
 
 .leaflet-draw-edit-edit {
-  background-position: 10px center !important;
-  background-size: 20px 20px !important;
+  background-position: 8px center !important;
+  background-size: 16px 16px !important;
 }
 
 .leaflet-draw-edit-remove::after {
   content: "BORRAR";
-  font-size: 14px;
 }
 
 .leaflet-draw-edit-remove {
-  background-position: 10px center !important;
-  background-size: 20px 20px !important;
+  background-position: 8px center !important;
+  background-size: 16px 16px !important;
 }
 
 /* Ajustes para sub-acciones (Guardar, Cancelar) */
 .leaflet-draw-actions {
   left: 100% !important;
   /* Mover a la derecha del botón */
-  margin-left: 10px !important;
+  margin-left: 8px !important;
 }
 
 .leaflet-draw-actions li a {
-  height: 40px !important;
-  line-height: 40px !important;
+  height: 30px !important;
+  line-height: 30px !important;
   background-color: #48bb78 !important;
   /* Verde para acciones */
   color: white !important;
   border: none !important;
   border-radius: 4px !important;
+  padding: 0 12px !important;
+  font-size: 12px !important;
 }
 
 .leaflet-draw-actions li:last-child a {
