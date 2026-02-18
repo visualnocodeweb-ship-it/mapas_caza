@@ -1,6 +1,7 @@
 export const ESTABLECIMIENTOS = [
     "Algar S.A",
     "Bey Malek",
+    "Bucalemu",
     "Cabeza De Zorro",
     "Cajon De Hualcupen Y Los Ñires",
     "Calcatre S.A",
