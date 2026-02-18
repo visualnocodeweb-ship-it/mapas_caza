@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 
-// Fix para iconos de Leaflet en Vite
+// Fix para iconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -14,13 +14,34 @@ L.Icon.Default.mergeOptions({
 });
 
 // Componente para manejar los controles de dibujo
-function DrawControls({ onPolygonChange }) {
+const DrawControls = ({ onPolygonChange }) => {
     const map = useMap();
     const featureGroupRef = useRef(new L.FeatureGroup());
 
     useEffect(() => {
         const featureGroup = featureGroupRef.current;
         map.addLayer(featureGroup);
+
+        const updateParent = () => {
+            const layers = featureGroup.getLayers();
+            if (layers.length === 0) {
+                onPolygonChange(null);
+                return;
+            }
+
+            // Construir MultiPolygon a partir de todas las capas
+            const coordinates = layers.map(layer => {
+                const geoJSON = layer.toGeoJSON();
+                return geoJSON.geometry.coordinates; // [[[x,y],...]]
+            });
+
+            const multiPolygon = {
+                type: "MultiPolygon",
+                coordinates: coordinates
+            };
+
+            onPolygonChange(multiPolygon);
+        };
 
         const drawControl = new L.Control.Draw({
             position: 'topright',
@@ -50,49 +71,37 @@ function DrawControls({ onPolygonChange }) {
 
         map.addControl(drawControl);
 
-        // Evento cuando se crea un polígono
+        // Eventos
         map.on(L.Draw.Event.CREATED, (e) => {
             const layer = e.layer;
-
-            // Limpiar polígonos anteriores
-            featureGroup.clearLayers();
             featureGroup.addLayer(layer);
-
-            const geoJSON = layer.toGeoJSON();
-            onPolygonChange(geoJSON.geometry);
+            updateParent();
         });
 
-        // Evento cuando se edita un polígono
-        map.on(L.Draw.Event.EDITED, (e) => {
-            const layers = e.layers;
-            layers.eachLayer((layer) => {
-                const geoJSON = layer.toGeoJSON();
-                onPolygonChange(geoJSON.geometry);
-            });
+        map.on(L.Draw.Event.EDITED, () => {
+            updateParent();
         });
 
-        // Evento cuando se elimina un polígono
         map.on(L.Draw.Event.DELETED, () => {
-            onPolygonChange(null);
+            updateParent();
         });
 
         return () => {
             map.removeControl(drawControl);
             map.removeLayer(featureGroup);
+            map.off(L.Draw.Event.CREATED);
+            map.off(L.Draw.Event.EDITED);
+            map.off(L.Draw.Event.DELETED);
         };
     }, [map, onPolygonChange]);
 
     return null;
-}
+};
 
 const MapDrawer = ({ onPolygonChange }) => {
-    // Centro de Argentina (aproximadamente Neuquén)
-    const center = [-38.9516, -68.0591];
-    const zoom = 8;
-
     return (
         <div className="map-container">
-            <MapContainer center={[-40.1687, -71.3473]} zoom={10} style={{ height: '500px', width: '100%', borderRadius: '12px' }}>
+            <MapContainer center={[-40.1687, -71.3473]} zoom={9} style={{ height: '500px', width: '100%', borderRadius: '12px' }}>
                 <TileLayer
                     url="https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
                     maxZoom={20}
@@ -102,8 +111,8 @@ const MapDrawer = ({ onPolygonChange }) => {
                 <DrawControls onPolygonChange={onPolygonChange} />
             </MapContainer>
             <div className="map-hint">
-                <span className="hint-icon">👆</span>
-                Usa el botón del polígono (⬠) arriba a la derecha para dibujar tu área de caza
+                <span className="hint-icon">💡</span>
+                <strong>Tip:</strong> Puedes dibujar varios polígonos. Usa el botón <strong>DIBUJAR</strong> para agregar áreas y <strong>EDITAR/BORRAR</strong> para modificar.
             </div>
         </div>
     );
