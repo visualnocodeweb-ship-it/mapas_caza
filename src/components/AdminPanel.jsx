@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { MapContainer, TileLayer, Polygon, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import AdminLogin from './AdminLogin';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -82,6 +84,12 @@ const AdminPanel = () => {
         }
     };
 
+    // Helper para convertir GeoJSON [lon, lat] a Leaflet [lat, lon]
+    const getPolygonPositions = (geoJsonPolygon) => {
+        if (!geoJsonPolygon || !geoJsonPolygon.coordinates) return [];
+        return geoJsonPolygon.coordinates[0].map(coord => [coord[1], coord[0]]);
+    };
+
     // Si no está autenticado, mostrar login
     if (!isAuthenticated) {
         return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
@@ -111,6 +119,41 @@ const AdminPanel = () => {
             </div>
 
             {error && <div className="message error">{error}</div>}
+
+            {submissions.length > 0 && (
+                <div className="admin-map-container" style={{ height: '400px', marginBottom: '30px', borderRadius: '12px', overflow: 'hidden', border: '2px solid #e2e8f0' }}>
+                    <MapContainer center={[-40.1687, -71.3473]} zoom={9} style={{ height: '100%', width: '100%' }}>
+                        <TileLayer
+                            url="http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                            maxZoom={20}
+                            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                            attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+                        />
+                        {submissions.map((sub) => {
+                            const positions = getPolygonPositions(sub.polygon);
+                            if (positions.length === 0) return null;
+                            return (
+                                <Polygon
+                                    key={sub.id}
+                                    positions={positions}
+                                    pathOptions={{ color: '#e53e3e', fillColor: '#e53e3e', fillOpacity: 0.4 }}
+                                >
+                                    <Popup>
+                                        <strong>{sub.establecimiento}</strong><br />
+                                        {sub.email}<br />
+                                        <button
+                                            onClick={() => downloadKML(sub.id, sub.establecimiento)}
+                                            style={{ marginTop: '5px', cursor: 'pointer' }}
+                                        >
+                                            📥 Descargar KML
+                                        </button>
+                                    </Popup>
+                                </Polygon>
+                            );
+                        })}
+                    </MapContainer>
+                </div>
+            )}
 
             {submissions.length === 0 ? (
                 <p className="no-data">No hay registros todavía</p>

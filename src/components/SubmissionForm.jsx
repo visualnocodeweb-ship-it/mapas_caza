@@ -14,6 +14,8 @@ const SubmissionForm = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
 
+    const [submittedId, setSubmittedId] = useState(null);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -30,7 +32,6 @@ const SubmissionForm = () => {
         e.preventDefault();
         setMessage({ type: '', text: '' });
 
-        // Validaciones
         if (!formData.email || !formData.establecimiento) {
             setMessage({ type: 'error', text: 'Por favor completa todos los campos' });
             return;
@@ -50,17 +51,11 @@ const SubmissionForm = () => {
                 polygon: polygon
             });
 
+            setSubmittedId(response.data.data.id);
             setMessage({
                 type: 'success',
-                text: '✅ Registro guardado exitosamente. Puedes descargar el KML desde el panel de administración.'
+                text: '✅ Registro guardado exitosamente.'
             });
-
-            // Limpiar formulario
-            setFormData({ email: '', establecimiento: '' });
-            setPolygon(null);
-
-            // Recargar el mapa (esto limpiará el polígono dibujado)
-            window.location.reload();
 
         } catch (error) {
             console.error('Error al enviar:', error);
@@ -72,6 +67,54 @@ const SubmissionForm = () => {
             setLoading(false);
         }
     };
+
+    const handleReset = () => {
+        setFormData({ email: '', establecimiento: '' });
+        setPolygon(null);
+        setSubmittedId(null);
+        setMessage({ type: '', text: '' });
+        window.location.reload();
+    };
+
+    const downloadKML = async () => {
+        if (!submittedId) return;
+        try {
+            const response = await axios.get(`${API_URL}/api/submissions/${submittedId}/kml`, {
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${formData.establecimiento}_${submittedId}.kml`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            alert('Error al descargar el archivo KML');
+        }
+    };
+
+    if (submittedId) {
+        return (
+            <div className="submission-form">
+                <div className="success-container">
+                    <h1>✅ ¡Registro Exitoso!</h1>
+                    <p>Se ha guardado el polígono para el establecimiento: <strong>{formData.establecimiento}</strong></p>
+
+                    <div className="success-actions">
+                        <button onClick={downloadKML} className="download-btn-large">
+                            📥 Descargar KML Ahora
+                        </button>
+
+                        <button onClick={handleReset} className="new-submission-btn">
+                            📝 Crear Nuevo Registro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="submission-form">

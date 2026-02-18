@@ -92,23 +92,21 @@ const MapDrawer = ({ onPolygonChange }) => {
 
     return (
         <div className="map-container">
-            <MapContainer
-                center={center}
-                zoom={zoom}
-                style={{ height: '500px', width: '100%', borderRadius: '8px' }}
-            >
+            <MapContainer center={[-40.1687, -71.3473]} zoom={10} style={{ height: '100%', width: '100%' }}>
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    url="http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                    maxZoom={20}
+                    subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                    attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
                 />
                 <DrawControls onPolygonChange={onPolygonChange} />
             </MapContainer>
-            <p className="map-hint">
-                💡 Usa la herramienta de polígono (arriba a la derecha) para dibujar el área de tu campo destinada a caza
-            </p>
+            <div className="map-hint">
+                <span className="hint-icon">👆</span>
+                Usa el botón del polígono (⬠) arriba a la derecha para dibujar tu área de caza
+            </div>
         </div>
     );
 };
 
 export default MapDrawer;
-
