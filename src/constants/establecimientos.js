@@ -1,5 +1,6 @@
 export const ESTABLECIMIENTOS = [
     "Algar S.A",
+    "Alcira",
     "Bey Malek",
     "Bucalemu",
     "Cabeza De Zorro",
