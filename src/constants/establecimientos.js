@@ -58,5 +58,6 @@ export const ESTABLECIMIENTOS = [
     "Casa De Lata Criadero",
     "Estancia Casa De Lata",
     "Ea. Chacabuco",
-    "Las Pircas"
+    "Las Pircas",
+    "Estancia Tipiliuke"
 ];
