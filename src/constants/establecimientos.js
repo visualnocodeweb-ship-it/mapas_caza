@@ -36,6 +36,7 @@ export const ESTABLECIMIENTOS = [
     "Estancia Belisle",
     "La Gabcia",
     "Estancia La Gotera",
+    "Estancia La María Juana",
     "La Mimi",
     "La Querencia",
     "La Rinconada S.A",
