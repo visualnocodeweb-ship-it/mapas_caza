@@ -13,6 +13,37 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Fix traducciones al español para leaflet-draw
+if (L.drawLocal) {
+    L.drawLocal.draw.toolbar.actions.title = 'Cancelar dibujo';
+    L.drawLocal.draw.toolbar.actions.text = 'Cancelar';
+    L.drawLocal.draw.toolbar.finish.title = 'Finalizar dibujo';
+    L.drawLocal.draw.toolbar.finish.text = 'Finalizar';
+    L.drawLocal.draw.toolbar.undo.title = 'Borrar último punto dibujado';
+    L.drawLocal.draw.toolbar.undo.text = 'Borrar último punto';
+    L.drawLocal.draw.toolbar.buttons.polygon = 'Dibujar un polígono';
+
+    L.drawLocal.draw.handlers.polygon.tooltip.start = 'Haga clic para empezar a dibujar el polígono.';
+    L.drawLocal.draw.handlers.polygon.tooltip.cont = 'Haga clic para continuar. (Botón "Borrar último punto" arriba).';
+    L.drawLocal.draw.handlers.polygon.tooltip.end = 'Haga clic en el primer punto para cerrar el polígono.';
+
+    L.drawLocal.edit.toolbar.actions.save.title = 'Guardar cambios';
+    L.drawLocal.edit.toolbar.actions.save.text = 'Guardar';
+    L.drawLocal.edit.toolbar.actions.cancel.title = 'Cancelar edición';
+    L.drawLocal.edit.toolbar.actions.cancel.text = 'Cancelar';
+    L.drawLocal.edit.toolbar.actions.clearAll.title = 'Borrar todos los polígonos';
+    L.drawLocal.edit.toolbar.actions.clearAll.text = 'Borrar todo';
+
+    L.drawLocal.edit.toolbar.buttons.edit = 'Editar polígonos';
+    L.drawLocal.edit.toolbar.buttons.editDisabled = 'No hay polígonos para editar';
+    L.drawLocal.edit.toolbar.buttons.remove = 'Borrar polígonos usando la herramienta';
+    L.drawLocal.edit.toolbar.buttons.removeDisabled = 'No hay polígonos para borrar';
+
+    L.drawLocal.edit.handlers.edit.tooltip.text = 'Arrastre los nodos para editar el polígono.';
+    L.drawLocal.edit.handlers.edit.tooltip.subtext = 'Haga clic en Guardar para conservar los cambios.';
+    L.drawLocal.edit.handlers.remove.tooltip.text = 'Haga clic en un polígono para borrarlo, luego pulse Guardar.';
+}
+
 // Componente para manejar los controles de dibujo
 const DrawControls = ({ onPolygonChange }) => {
     const map = useMap();
@@ -74,6 +105,31 @@ const DrawControls = ({ onPolygonChange }) => {
         // Eventos
         map.on(L.Draw.Event.CREATED, (e) => {
             const layer = e.layer;
+
+            // Agregar popup de borrado fácil para el polígono clickeado
+            const popupContent = document.createElement('div');
+            popupContent.innerHTML = `
+                <div style="text-align: center; padding: 5px; min-width: 120px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 14px; color: #333;">Polígono dibujado</p>
+                    <button class="delete-polygon-btn" style="background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: background-color 0.2s;">
+                        🗑️ Borrar Polígono
+                    </button>
+                </div>
+            `;
+
+            const btn = popupContent.querySelector('.delete-polygon-btn');
+            btn.onmouseover = () => btn.style.backgroundColor = '#c0392b';
+            btn.onmouseout = () => btn.style.backgroundColor = '#e74c3c';
+            btn.onclick = () => {
+                featureGroup.removeLayer(layer);
+                updateParent();
+            };
+
+            layer.bindPopup(popupContent);
+
+            // Mostrar texto flotante al pasar el ratón para guiar al usuario
+            layer.bindTooltip("Clic para ver opciones (Ej: Borrar)", { sticky: true });
+
             featureGroup.addLayer(layer);
             updateParent();
         });
