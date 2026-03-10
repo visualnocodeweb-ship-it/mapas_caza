@@ -96,7 +96,8 @@ const DrawControls = ({ onPolygonChange }) => {
                 }
             },
             edit: {
-                featureGroup: featureGroup
+                featureGroup: featureGroupRef.current,
+                remove: true // Asegura que el botón de borrar está presente en la barra de herramientas de edición de Leaflet-Draw
             }
         });
 
@@ -105,31 +106,6 @@ const DrawControls = ({ onPolygonChange }) => {
         // Eventos
         map.on(L.Draw.Event.CREATED, (e) => {
             const layer = e.layer;
-
-            // Agregar popup de borrado fácil para el polígono clickeado
-            const popupContent = document.createElement('div');
-            popupContent.innerHTML = `
-                <div style="text-align: center; padding: 5px; min-width: 120px;">
-                    <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 14px; color: #333;">Polígono dibujado</p>
-                    <button class="delete-polygon-btn" style="background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: background-color 0.2s;">
-                        🗑️ Borrar Polígono
-                    </button>
-                </div>
-            `;
-
-            const btn = popupContent.querySelector('.delete-polygon-btn');
-            btn.onmouseover = () => btn.style.backgroundColor = '#c0392b';
-            btn.onmouseout = () => btn.style.backgroundColor = '#e74c3c';
-            btn.onclick = () => {
-                featureGroup.removeLayer(layer);
-                updateParent();
-            };
-
-            layer.bindPopup(popupContent);
-
-            // Mostrar texto flotante al pasar el ratón para guiar al usuario
-            layer.bindTooltip("Clic para ver opciones (Ej: Borrar)", { sticky: true });
-
             featureGroup.addLayer(layer);
             updateParent();
         });
