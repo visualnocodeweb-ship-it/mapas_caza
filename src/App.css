@@ -447,20 +447,36 @@ tbody tr:hover {
 }
 
 .leaflet-draw-actions li a {
-  height: 30px !important;
-  line-height: 30px !important;
-  background-color: #48bb78 !important;
-  /* Verde para acciones */
+  height: 34px !important;
+  line-height: 34px !important;
+  background-color: #2b6cb0 !important;
+  /* Azul para acciones de punto */
   color: white !important;
   border: none !important;
-  border-radius: 4px !important;
-  padding: 0 12px !important;
-  font-size: 12px !important;
+  border-radius: 6px !important;
+  padding: 0 15px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+  margin-right: 5px !important;
 }
 
 .leaflet-draw-actions li:last-child a {
   background-color: #e53e3e !important;
   /* Rojo para cancelar */
+}
+
+.leaflet-draw-actions li:first-child a {
+  background-color: #48bb78 !important;
+  /* Verde para finalizar */
+}
+
+.leaflet-draw-actions {
+  left: auto !important;
+  right: 100% !important;
+  margin-right: 10px !important;
+  margin-top: -2px !important;
 }
 
 /* Success Screen */
