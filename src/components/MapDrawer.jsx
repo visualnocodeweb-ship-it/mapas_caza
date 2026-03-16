@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { MapContainer, TileLayer, FeatureGroup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -168,11 +168,59 @@ const DrawControls = ({ onPolygonChange }) => {
 };
 
 const MapDrawer = ({ onPolygonChange }) => {
+    const [mapType, setMapType] = useState('y'); // 'y': Híbrido (por defecto), 's': Satélite, 'm': Calles
+
+    const buttons = [
+        { label: '🛰️ Satélite', value: 's' },
+        { label: '🛣️ Calles', value: 'm' },
+        { label: '🗺️ Híbrido', value: 'y' }
+    ];
+
     return (
-        <div className="map-container">
+        <div className="map-container" style={{ position: 'relative' }}>
+            {/* Selector de Tipo de Mapa */}
+            <div style={{
+                position: 'absolute',
+                top: '12px',
+                left: '52px',
+                zIndex: 1000,
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(4px)',
+                padding: '3px',
+                borderRadius: '8px',
+                display: 'flex',
+                gap: '3px',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                border: '1px solid rgba(0,0,0,0.08)'
+            }}>
+                {buttons.map(btn => (
+                    <button
+                        key={btn.value}
+                        type="button"
+                        onClick={() => setMapType(btn.value)}
+                        style={{
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: mapType === btn.value ? '#3182ce' : 'transparent',
+                            color: mapType === btn.value ? 'white' : '#4a5568',
+                            fontWeight: '600',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                        }}
+                    >
+                        {btn.label}
+                    </button>
+                ))}
+            </div>
+
             <MapContainer center={[-40.1687, -71.3473]} zoom={9} style={{ height: '500px', width: '100%', borderRadius: '12px' }}>
                 <TileLayer
-                    url="https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+                    url={`https://{s}.google.com/vt/lyrs=${mapType}&x={x}&y={y}&z={z}`}
                     maxZoom={20}
                     subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
                     attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
