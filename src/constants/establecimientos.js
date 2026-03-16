@@ -63,5 +63,7 @@ export const ESTABLECIMIENTOS = [
     "Estancia Casa De Lata",
     "Ea. Chacabuco",
     "Las Pircas",
-    "Estancia Tipiliuke"
+    "Estancia Tipiliuke",
+    "Pino Huacho",
+    "San Juan de Quillén"
 ];
